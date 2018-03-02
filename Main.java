@@ -8,14 +8,14 @@ public class Main {
 
 
 
-//        // === Call encryptMessage() on a text to convert it to huffman binary text.
-//        String file = "/Users/juan/Downloads/test.txt";
-//        graph.encryptText(file);
+        // === Call encryptMessage() on a text to convert it to huffman binary text.
+        String file = "/Users/juan/Downloads/test.txt";
+        graph.encryptText(file);
 //
 
-
+//
 //        // === Call decryptMessage() on a binary text to decrypt it.
-        String file2 = "/Users/juan/Downloads/test_Encrypted.txt";
-        graph.decryptMessage(file2);
+//        String file2 = "/Users/juan/Downloads/test_Encrypted.txt";
+//        graph.decryptMessage(file2);
     }
 }

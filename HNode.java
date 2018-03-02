@@ -23,8 +23,6 @@ public class HNode {
         return value;
     }
 
-
-
     public char getCharacter() {
         return character;
     }
