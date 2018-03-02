@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.Iterator;
 
 
-public class Encoder {
+class Encoder {
     private FileOutputStream stream = null;
     private OutputStreamWriter writer = null;
 
@@ -38,7 +38,7 @@ public class Encoder {
         if(debug) {
             System.out.println("charMap size: " + charMap.size());
             for (HNode n : queue) {
-                System.out.print(n.getCharacter() + ""+n.getValue()+"");
+                System.out.print(n.getCharacter() + ""+n.getValue()+"s");
             }
         }
 
@@ -54,18 +54,23 @@ public class Encoder {
             root = newNode;
             queue.add(newNode);
         }
+
+        if(root == null){
+            throw new IndexOutOfBoundsException("Text must be atleast 2 characters.");
+        }
         getCode(root, "");
     }
 
 
 
-    public void encryptText(String file) {
+    void encryptText(String file) {
         String inputFileName = file;
         charMap = new TreeMap<>();
         StringBuilder builder = new StringBuilder();
         char current = CharReader.NULL;
 
         CharReader charReader = new CharReader(file);
+
         while (current != CharReader.EOF) {  //Read the file until EOF
             charReader.moveNext();
             current = charReader.current();
@@ -101,7 +106,6 @@ public class Encoder {
         buildBinaryText(inputFileName);
     }
 
-
     private void buildBinaryText(String file) {
         StringBuilder binaryValue = new StringBuilder();
         CharReader charReader = new CharReader(file);
@@ -122,7 +126,6 @@ public class Encoder {
                 break;
             }
 
-
             binaryValue.append(binaryMap.get(current));
 
         }
@@ -130,13 +133,14 @@ public class Encoder {
         if(debug) {
             System.out.println(binaryValue.toString());
         }
-        writeFile(binaryValue, "Encrypted");
+        else
+            writeFile(binaryValue, "Encrypted");
     }
 
 
 
 
-    public void getCode(HNode root, String s){
+    private void getCode(HNode root, String s){
         if(root.getLeft() == null && root.getRight() == null){
 
 
@@ -152,7 +156,7 @@ public class Encoder {
     }
 
 
-    public void decryptMessage(String file) {
+    protected void decryptMessage(String file) {
         StringBuilder builder = new StringBuilder();
         int current = CharReader.NULL;
         CharReader charReader = new CharReader(file);
@@ -205,7 +209,7 @@ public class Encoder {
         }
     }
 
-    public String saveGraph(TreeMap graph){
+    private String saveGraph(TreeMap graph){
         StringBuilder graphSave = new StringBuilder();
         Iterator it = graph.entrySet().iterator();
         int graphSize = graph.size();
@@ -224,7 +228,6 @@ public class Encoder {
         }
 
 
-        int count = 0;
         while(it.hasNext()){
             Map.Entry pair = (Map.Entry)it.next();
             int key = (int)pair.getKey();
@@ -233,10 +236,8 @@ public class Encoder {
             //-------------Key--------//
             graphSave.append(getBinaryForAscii(key));
 
-
             //-------------CharMap Value--------//
             //Adds charMap Value. must be 8bit x 2 since the value could be bigger than 9. Error if bigger than 99
-
             if(charMapValue >= 1000){
                 throw new IndexOutOfBoundsException("Too big message to encrypt");
             }
@@ -273,7 +274,6 @@ public class Encoder {
                 System.out.println("Key: (" + key + ") " + getBinaryForAscii(key));
                 System.out.println("Huffman value Length in Ascii binary: (" + length + ") + " + getBinaryForAscii((char) length));
                 System.out.println("Huffman Length: " + pair.getValue());
-                System.out.println("------" + ++count + "---------");
             }
         }
         return graphSave.toString();
@@ -283,7 +283,6 @@ public class Encoder {
     private void generateGraphFromBinaries(CharReader charReader){
         charMap = new TreeMap<>();
         int graphCounter = 0;
-
     //-------------------------Reads how big the Graph is(size). Between 1 - 512 key so (3 x 8 bit)-------------------------
         //---first 8 bit ---(hundreds)
         String amount = charReader.getCharacters(8);
@@ -302,16 +301,12 @@ public class Encoder {
         graphCount = Integer.parseInt(""+ firstInt + secondInt + thirdInt); //implicit cast from int to string then parse back to int(but added together
 
 
-        String value ="";
-
         while (graphCounter < graphCount) {
             //-------------------------binaryMap key + charMap key  (1x 8 bit)-------------------------
 
             amount = charReader.getCharacters(8);
             int key = convertBinaryToAsciiValue(amount);
             int charMapKey = key;
-//            System.out.print("| charMapkey "+ amount);
-
 
             //------------------------- charMap value (3 x 8 bit) -------------------------
             //---first 8 bit --- (hundreds)
@@ -319,32 +314,24 @@ public class Encoder {
             int charMapValue = convertBinaryToAsciiValue(amount);
             int firstCharMapValue = charIntToValue(charMapValue);
 
-//            System.out.print("| firstCharmap "+ amount);
-//
             //--- second 8 bit---(tens)
             amount = charReader.getCharacters(8);
             charMapValue = convertBinaryToAsciiValue(amount);
             int secondCharMapValue = charIntToValue(charMapValue);
-//            System.out.print("| SecondCharMap "+ amount);
 
             //--- third 8 bit---(singulars)
             amount = charReader.getCharacters(8);
             charMapValue = convertBinaryToAsciiValue(amount);
             int thirdCharMapValue = charIntToValue(charMapValue);
-//            System.out.print("| ThirdCharMap "+ amount);
-
 
             //--finally put both together att insert into charMap--
             charMapValue = Integer.parseInt(firstCharMapValue + "" +secondCharMapValue + thirdCharMapValue); //implicit typecast
             charMap.put(charMapKey, charMapValue);
 
-
             //------------------------- huffman bit custom size (2-16bit) -------------------------
             //------first 8 bit of length---(tens)
             amount = charReader.getCharacters(8);
-//            System.out.print("aammount "+ amount);
             int stepCount = convertBinaryToAsciiValue(amount); //reads how long the huffman bit will be
-//            System.out.println("Steocount "+ stepCount);
             int stepCount1 = charIntToValue(stepCount);
 
             //------last 8 bit of length---(singulars)
@@ -353,16 +340,10 @@ public class Encoder {
             int stepCount2  = charIntToValue(stepCount);
 
             stepCount = Integer.parseInt("" + stepCount1 + stepCount2);
-
-//            System.out.println("Stepcount"+ stepCount);
-//            stepCount = charIntToValue(stepCount); // converts it to from ascii-value to int.
-
-             value = charReader.getCharacters(stepCount); // read huffman-bit from file based on calculated length
-
+            String value = charReader.getCharacters(stepCount); // read huffman-bit from file based on calculated length
 
             binaryMap.put(key, value); //add key and huffman value.
             graphCounter++; // keep track of how many Mapvalues should be inserted(first value of binary text)
-
 
 
             if(debug) {
@@ -373,16 +354,13 @@ public class Encoder {
         }
     }
 
-
     private int charIntToValue(int i){
         char convert = (char)i;
         return Integer.parseInt( convert+"");
     }
 
     private int intToAscii(int i){
-
-        int ascii = (int)Character.forDigit(i, 10)  ;
-        return ascii;
+        return (int)Character.forDigit(i, 10)  ;
     }
 
     private String getBinaryForAscii(int info){
@@ -397,11 +375,10 @@ public class Encoder {
 
 
     private void writeFile(StringBuilder builder, String name){
-
         System.out.println(name+" message: \n" + builder.toString());
         try{
             try{
-                stream = new FileOutputStream("/Users/juan/Downloads/test_"+name+".txt");
+                stream = new FileOutputStream(System.getProperty("user.dir") + "/test_"+name+".txt");
                 writer = new OutputStreamWriter(stream);
                 writer.write(builder.toString());
             }

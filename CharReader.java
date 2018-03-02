@@ -15,7 +15,8 @@ class CharReader {
             stream = new FileInputStream(fileName);
             reader = new InputStreamReader(stream);
         }catch(FileNotFoundException fe){
-            System.out.println("FileNotFound: " + fe);
+            System.err.println("FileNotFound: " + fe+". Please make sure it exist." );
+            System.exit(0);
         }
     }
 
@@ -32,7 +33,8 @@ class CharReader {
             }
         }
         catch (IOException e) {
-            System.out.println("IOException");
+            System.err.println("IOException: " + e+". Error when reading file." );
+            System.exit(0);
         }
     }
 
