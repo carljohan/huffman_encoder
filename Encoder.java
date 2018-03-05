@@ -46,7 +46,6 @@ class Encoder {
         while (queue.size() > 1) {
             HNode x = queue.poll();
             HNode y = queue.poll();
-
             HNode newNode = new HNode(y.getValue() + x.getValue());
             newNode.setLeft(x);
             newNode.setRight(y);
@@ -186,7 +185,6 @@ class Encoder {
             }
         }
 
-
         if(debug) {
             System.out.println("Message: "+ builder.toString());
         }else {
@@ -250,29 +248,8 @@ class Encoder {
                 addAtChar(graphSave, (""+charMapValue), 1, 3 );
             }
 
-            //-------------huffman bit length Value up to 16-bit--------//
-
-            //Calculate how long the huffman binary is.
-            int length = (char)((String)pair.getValue()).length();
-
-            if(length >= 100){
-                throw new IndexOutOfBoundsException("Too big message to encrypt");
-            }
-            if(length >= 10){
-                addAtChar(graphSave, (""+length), 2, 2);
-            }else{
-                addAtChar(graphSave, (""+length), 1, 2);
-            }
-
-
-
-            //-------------huffman actual Value--------//
-            graphSave.append(pair.getValue());
-
-
             if(debug) {
                 System.out.println("Key: (" + key + ") " + getBinaryForAscii(key));
-                System.out.println("Huffman value Length in Ascii binary: (" + length + ") + " + getBinaryForAscii((char) length));
                 System.out.println("Huffman Length: " + pair.getValue());
             }
         }
@@ -283,6 +260,7 @@ class Encoder {
     private void generateGraphFromBinaries(CharReader charReader){
         charMap = new TreeMap<>();
         int graphCounter = 0;
+
     //-------------------------Reads how big the Graph is(size). Between 1 - 512 key so (3 x 8 bit)-------------------------
         //---first 8 bit ---(hundreds)
         String amount = charReader.getCharacters(8);
@@ -300,8 +278,8 @@ class Encoder {
         int thirdInt = charIntToValue(graphCount);
         graphCount = Integer.parseInt(""+ firstInt + secondInt + thirdInt); //implicit cast from int to string then parse back to int(but added together
 
-
         while (graphCounter < graphCount) {
+
             //-------------------------binaryMap key + charMap key  (1x 8 bit)-------------------------
 
             amount = charReader.getCharacters(8);
@@ -328,27 +306,11 @@ class Encoder {
             charMapValue = Integer.parseInt(firstCharMapValue + "" +secondCharMapValue + thirdCharMapValue); //implicit typecast
             charMap.put(charMapKey, charMapValue);
 
-            //------------------------- huffman bit custom size (2-16bit) -------------------------
-            //------first 8 bit of length---(tens)
-            amount = charReader.getCharacters(8);
-            int stepCount = convertBinaryToAsciiValue(amount); //reads how long the huffman bit will be
-            int stepCount1 = charIntToValue(stepCount);
-
-            //------last 8 bit of length---(singulars)
-            amount = charReader.getCharacters(8);
-            stepCount = convertBinaryToAsciiValue(amount); //reads how long the huffman bit will be
-            int stepCount2  = charIntToValue(stepCount);
-
-            stepCount = Integer.parseInt("" + stepCount1 + stepCount2);
-            String value = charReader.getCharacters(stepCount); // read huffman-bit from file based on calculated length
-
-            binaryMap.put(key, value); //add key and huffman value.
             graphCounter++; // keep track of how many Mapvalues should be inserted(first value of binary text)
 
 
             if(debug) {
                 System.out.println("key: " + charMapKey + ". value: " + charMapValue);
-                System.out.println("key: " + key + ". Value: " + value);
                 System.out.println("--------" + graphCounter + "------");
             }
         }
